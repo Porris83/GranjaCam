@@ -1,6 +1,7 @@
 plugins {
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
+    id ("com.android.application")
+    id ("org.jetbrains.kotlin.android")
+    id ("com.google.gms.google-services") // Para Firebase
 }
 
 android {
@@ -51,6 +52,10 @@ android {
 
 dependencies {
 
+    implementation ("com.google.mlkit:face-detection:16.1.7")
+    implementation ("androidx.camera:camera-core:1.4.0")
+
+    implementation ("androidx.camera:camera-view:1.4.0")
     // Biblioteca principal de CameraX
     implementation ("androidx.camera:camera-core:1.1.0")
 

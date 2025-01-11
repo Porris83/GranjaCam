@@ -53,9 +53,9 @@ android {
 dependencies {
 
     implementation ("com.google.mlkit:face-detection:16.1.7")
-    implementation ("androidx.camera:camera-core:1.4.0")
+    implementation ("androidx.camera:camera-core:1.4.1")
 
-    implementation ("androidx.camera:camera-view:1.4.0")
+    implementation ("androidx.camera:camera-view:1.4.1")
     // Biblioteca principal de CameraX
     implementation ("androidx.camera:camera-core:1.1.0")
 
@@ -63,7 +63,7 @@ dependencies {
     implementation ("androidx.camera:camera-camera2:1.1.0")
 
     // Biblioteca de ciclo de vida de CameraX
-    implementation ("androidx.camera:camera-lifecycle:1.1.0")
+    implementation ("androidx.camera:camera-lifecycle:1.4.1")
 
     // Biblioteca de vista de CameraX
     implementation ("androidx.camera:camera-view:1.0.0-alpha31")

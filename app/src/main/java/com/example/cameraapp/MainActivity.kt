@@ -1,12 +1,12 @@
 package com.example.cameraapp
 
 import android.Manifest
+import android.content.ContentValues
 import android.content.pm.PackageManager
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Environment
-import android.os.Handler
-import android.os.Looper
+import android.provider.MediaStore
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.viewModels
@@ -39,7 +39,6 @@ class MainActivity : AppCompatActivity() {
     private var mediaPlayer: MediaPlayer? = null
     private val faceDetectionViewModel: FaceDetectionViewModel by viewModels()
     private var imageCapture: ImageCapture? = null
-    private val handler = Handler(Looper.getMainLooper())
     private var lastDetectedFaceId: Int? = null
     private var lastDetectionTime: Long = 0
 
@@ -83,17 +82,11 @@ class MainActivity : AppCompatActivity() {
                     Log.d("FaceDetected", "Face detected after 40 seconds, photo taken.")
                 }
 
-                handler.postDelayed({
-                    if (currentFaceId == lastDetectedFaceId) {
-                        takePhoto()
-                        lastDetectionTime = System.currentTimeMillis()
-                        Log.d("FaceDetected", "Face detected after 40 seconds, photo taken.")
-                    }
-                }, 40000)
-
                 overlay?.setFaces(faces)
             } else {
                 overlay?.clear()
+                lastDetectedFaceId = null
+                lastDetectionTime = 0
             }
         }
     }
@@ -182,20 +175,25 @@ class MainActivity : AppCompatActivity() {
     private fun takePhoto() {
         val imageCapture = imageCapture ?: return
 
-        val photoFile = File(
-            getExternalFilesDir(Environment.DIRECTORY_PICTURES),
-            "Fotos Rostros/Rostro_${System.currentTimeMillis()}.jpg"
-        )
+        val contentValues = ContentValues().apply {
+            put(MediaStore.Images.Media.DISPLAY_NAME, "Rostro_${System.currentTimeMillis()}.jpg")
+            put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+            put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/Fotos Rostros")
+        }
 
-        val outputOptions = ImageCapture.OutputFileOptions.Builder(photoFile).build()
+        val outputOptions = ImageCapture.OutputFileOptions.Builder(
+            contentResolver,
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            contentValues
+        ).build()
 
         imageCapture.takePicture(
             outputOptions,
             ContextCompat.getMainExecutor(this),
             object : ImageCapture.OnImageSavedCallback {
                 override fun onImageSaved(outputFileResults: ImageCapture.OutputFileResults) {
-                    Toast.makeText(this@MainActivity, "Photo saved: ${photoFile.absolutePath}", Toast.LENGTH_SHORT).show()
-                    Log.d("ImageSaved", "Photo saved: ${photoFile.absolutePath}")
+                    Toast.makeText(this@MainActivity, "Photo saved", Toast.LENGTH_SHORT).show()
+                    Log.d("ImageSaved", "Photo saved: ${outputFileResults.savedUri}")
                 }
 
                 override fun onError(exception: ImageCaptureException) {

@@ -1,11 +1,13 @@
 package com.example.cameraapp
 
 import android.app.Application
+import android.content.ContentValues
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.Image
 import android.os.Environment
 import android.os.SystemClock
+import android.provider.MediaStore
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -14,8 +16,6 @@ import androidx.lifecycle.viewModelScope
 import com.google.mlkit.vision.face.Face
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.io.File
-import java.io.FileOutputStream
 
 class FaceDetectionViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -40,6 +40,8 @@ class FaceDetectionViewModel(application: Application) : AndroidViewModel(applic
             }
         } else {
             _faces.postValue(emptyList())
+            lastDetectedFaceId = null
+            lastDetectionTime = 0
         }
     }
 
@@ -67,18 +69,21 @@ class FaceDetectionViewModel(application: Application) : AndroidViewModel(applic
             val bitmap = mediaImage.toBitmap()
             if (bitmap != null) {
                 val fileName = "Rostro_${System.currentTimeMillis()}.jpg"
-                val dir = File(
-                    getApplication<Application>().getExternalFilesDir(Environment.DIRECTORY_PICTURES),
-                    "Fotos Rostros"
-                )
-                if (!dir.exists()) dir.mkdirs()
-
-                val file = File(dir, fileName)
-                FileOutputStream(file).use { fos ->
-                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
+                val contentValues = ContentValues().apply {
+                    put(MediaStore.Images.Media.DISPLAY_NAME, fileName)
+                    put(MediaStore.Images.Media.MIME_TYPE, "image/jpeg")
+                    put(MediaStore.Images.Media.RELATIVE_PATH, Environment.DIRECTORY_PICTURES + "/Fotos Rostros")
                 }
 
-                Log.d("ImageSaved", "Imagen guardada en: ${file.absolutePath}")
+                val uri = getApplication<Application>().contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, contentValues)
+                if (uri != null) {
+                    getApplication<Application>().contentResolver.openOutputStream(uri)?.use { fos ->
+                        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos)
+                    }
+                    Log.d("ImageSaved", "Imagen guardada en: $uri")
+                } else {
+                    Log.e("SaveImageError", "Error al guardar la imagen: URI es null")
+                }
             } else {
                 Log.e("SaveImageError", "Error al guardar la imagen: Bitmap es null")
             }
@@ -86,4 +91,5 @@ class FaceDetectionViewModel(application: Application) : AndroidViewModel(applic
             Log.e("SaveImageError", "Error al guardar la imagen: ${e.message}")
         }
     }
+
 }

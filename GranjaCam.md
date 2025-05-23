@@ -22,7 +22,7 @@ Cuando detecta un rostro nuevo o cuando el mismo rostro permanece en el encuadre
 
 ## Próximas mejoras
 
-- Integración con modelo entrenado personalizado *(modelo en desarrollo,  ver [modelo en este repositorio](https://github.com/Porris83/   Modelo-Clasificador-de-cerdos))*.
+- Integración con modelo entrenado personalizado *(modelo en desarrollo,  ver [modelo en este repositorio](https://github.com/Porris83/Modelo-Clasificador-de-cerdos))*.
 - Mejoras en la precisión de detección.
 - Optimización del rendimiento en dispositivos de gama baja.
 - Posibilidad de configurar parámetros de detección.
